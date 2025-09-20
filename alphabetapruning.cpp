@@ -22,7 +22,7 @@ string convert(vector<int> heaps)
     return str;
 }
 
-int minimax(vector<int> &heaps, int m, bool flag, unordered_map<string, int> &map, unordered_map<string, pair<int, int>> &moves)
+int minimax(vector<int> &heaps, int m, bool flag, unordered_map<string, int> &map, unordered_map<string, pair<int, int>> &moves, int alpha, int beta)
 {
     if (isZero(heaps))
     {
@@ -44,13 +44,14 @@ int minimax(vector<int> &heaps, int m, bool flag, unordered_map<string, int> &ma
             for (int j = 1; j <= heaps[i]; j++)
             {
                 heaps[i] -= j;
-                curr = minimax(heaps, m, !flag, map, moves);
+                curr = minimax(heaps, m, !flag, map, moves, alpha, beta);
                 if (curr > maxi)
                 {
                     maxi = curr;
                     move = {i, j};
                     moves[state] = move;
-                    if (maxi == 1)
+                    alpha = max(alpha, maxi);
+                    if (alpha >= beta)
                         prune = true;
                 }
                 heaps[i] += j;
@@ -70,13 +71,14 @@ int minimax(vector<int> &heaps, int m, bool flag, unordered_map<string, int> &ma
             for (int j = 1; j <= heaps[i]; j++)
             {
                 heaps[i] -= j;
-                curr = minimax(heaps, m, !flag, map, moves);
+                curr = minimax(heaps, m, !flag, map, moves, alpha, beta);
                 if (curr < mini)
                 {
                     mini = curr;
                     move = {i, j};
                     moves[state] = move;
-                    if (mini == -1)
+                    beta = min(beta, mini);
+                    if (alpha >= beta)
                         prune = true;
                 }
                 heaps[i] += j;
@@ -104,7 +106,7 @@ int main()
         heaps.push_back(j);
     }
     auto start = high_resolution_clock::now();
-    int val = minimax(heaps, m, true, map, moves);
+    int val = minimax(heaps, m, true, map, moves, INT_MIN, INT_MAX);
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
     if (val == 1)
